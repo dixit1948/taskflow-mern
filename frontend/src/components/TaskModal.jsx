@@ -34,6 +34,7 @@ function Editor({ task, onClose }) {
   const [itemText, setItemText] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [customFocusMins, setCustomFocusMins] = useState(25);
 
   const set = (key, value) => setDraft(d => ({ ...d, [key]: value }));
 
@@ -246,9 +247,42 @@ function Editor({ task, onClose }) {
         </div>
 
         {task.focusMinutes > 0 && <p className="muted">{task.focusMinutes} min focused on this task so far.</p>}
-        <button type="button" className="btn btn-ghost focus-btn" onClick={() => (focus.start(task, 25), onClose())}>
-          <Timer size={16} /> Start a 25 min focus session
-        </button>
+
+        <div className="field">
+          <span>Focus duration</span>
+          <div className="segmented" style={{ display: "grid", gridTemplateColumns: "repeat(5, 1fr)" }}>
+            {[10, 15, 25, 45, 60].map(m => (
+              <button
+                type="button"
+                key={m}
+                className={customFocusMins === m ? "on" : ""}
+                onClick={() => setCustomFocusMins(m)}
+              >
+                {m}m
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+          <input
+            type="number"
+            min="1"
+            max="180"
+            style={{ width: "90px" }}
+            value={customFocusMins}
+            onChange={e => setCustomFocusMins(Math.max(1, Math.min(180, Number(e.target.value) || 1)))}
+            aria-label="Custom focus minutes"
+          />
+          <button
+            type="button"
+            className="btn btn-ghost focus-btn"
+            style={{ flex: 1 }}
+            onClick={() => (focus.start(task, customFocusMins), onClose())}
+          >
+            <Timer size={16} /> Start {customFocusMins} min focus
+          </button>
+        </div>
       </form>
     </Modal>
   );

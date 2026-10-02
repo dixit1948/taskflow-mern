@@ -21,6 +21,7 @@ export function FocusProvider({ children }) {
   const toast = useToast();
   const [session, setSession] = useState(null); // { taskId, title, minutes, endsAt, pausedLeft }
   const [alarmActive, setAlarmActive] = useState(null); // { taskId, title, minutes }
+  const [promptTask, setPromptTask] = useState(null); // task to choose focus duration for
   const [now, setNow] = useState(() => Date.now());
 
   const running = session && session.pausedLeft == null;
@@ -84,8 +85,12 @@ export function FocusProvider({ children }) {
       left,
       alarmActive,
       dismissAlarm,
+      promptTask,
+      openPrompt: setPromptTask,
+      closePrompt: () => setPromptTask(null),
       start: (task, minutes = 25) => {
         dismissAlarm();
+        setPromptTask(null);
         setNow(Date.now());
         setSession({ taskId: task._id, title: task.title, minutes, endsAt: Date.now() + minutes * 60_000, pausedLeft: null });
       },
@@ -93,7 +98,7 @@ export function FocusProvider({ children }) {
       resume: () => setSession(s => s && { ...s, endsAt: Date.now() + s.pausedLeft, pausedLeft: null }),
       stop: () => finish(false)
     }),
-    [session, left, alarmActive, dismissAlarm, finish]
+    [session, left, alarmActive, dismissAlarm, promptTask, finish]
   );
 
   return <FocusContext.Provider value={value}>{children}</FocusContext.Provider>;

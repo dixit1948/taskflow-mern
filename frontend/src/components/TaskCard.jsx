@@ -96,7 +96,7 @@ export default function TaskCard({ task, draggable = false, selectMode = false, 
           icon: task.pinned ? <PinOff size={16} /> : <Pin size={16} />,
           run: () => update(task._id, { pinned: !task.pinned })
         },
-        { label: "Focus for 25 min", icon: <Timer size={16} />, run: () => focus.start(task, 25) },
+        { label: "Focus timer...", icon: <Timer size={16} />, run: () => focus.openPrompt(task) },
         task.archived
           ? { label: "Unarchive", icon: <ArchiveRestore size={16} />, run: () => update(task._id, { archived: false }) }
           : { label: "Archive", icon: <Archive size={16} />, run: () => update(task._id, { archived: true }) },
