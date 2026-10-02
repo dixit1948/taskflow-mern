@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { CircleCheck, ClipboardList, Flame, Timer, TriangleAlert } from "lucide-react";
+import { CircleCheck, ClipboardList, Flame, Sparkles, Timer, TriangleAlert } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { useTasks } from "../context/TasksContext";
 import QuickAdd from "../components/QuickAdd";
@@ -23,7 +23,8 @@ export default function Dashboard() {
   return (
     <div className="dash">
       <h1 className="welcome">
-        Welcome back, {user.name.split(" ")[0]} <span aria-hidden="true">👋</span>
+        Welcome back, {user.name.split(" ")[0]}
+        <Sparkles size={22} style={{ display: "inline-block", verticalAlign: "middle", marginLeft: 8, color: "var(--coral)" }} />
       </h1>
       <p className="muted welcome-sub">{greeting()}. Here's where things stand today.</p>
 
