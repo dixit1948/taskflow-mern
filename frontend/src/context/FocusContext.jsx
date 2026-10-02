@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { useTasks } from "./TasksContext";
 import { useToast } from "./ToastContext";
+import { alarm } from "../lib/alarm";
 
 const FocusContext = createContext(null);
 
@@ -19,6 +20,7 @@ export function FocusProvider({ children }) {
   const { logFocus } = useTasks();
   const toast = useToast();
   const [session, setSession] = useState(null); // { taskId, title, minutes, endsAt, pausedLeft }
+  const [alarmActive, setAlarmActive] = useState(null); // { taskId, title, minutes }
   const [now, setNow] = useState(() => Date.now());
 
   const running = session && session.pausedLeft == null;
@@ -30,16 +32,32 @@ export function FocusProvider({ children }) {
     return () => clearInterval(timer);
   }, [running]);
 
+  // Cleanup alarm on unmount
+  useEffect(() => {
+    return () => alarm.stop();
+  }, []);
+
+  const dismissAlarm = useCallback(() => {
+    alarm.stop();
+    setAlarmActive(null);
+  }, []);
+
   const finish = useCallback(
     completed => {
       if (!session) return;
       const remaining = session.pausedLeft ?? Math.max(0, session.endsAt - Date.now());
       const minutes = completed ? session.minutes : Math.floor(session.minutes - remaining / 60_000);
       if (minutes >= 1) logFocus(session.taskId, minutes);
+
+      const title = session.title;
+      const taskId = session.taskId;
       setSession(null);
+
       if (completed) {
         toast(`Focus session complete. ${minutes} min logged.`);
-        notify("Focus session complete", session.title);
+        notify("Focus session complete", title);
+        alarm.start();
+        setAlarmActive({ taskId, title, minutes });
       } else if (minutes >= 1) {
         toast(`${minutes} min of focus logged.`);
       }
@@ -64,7 +82,10 @@ export function FocusProvider({ children }) {
     () => ({
       session,
       left,
+      alarmActive,
+      dismissAlarm,
       start: (task, minutes = 25) => {
+        dismissAlarm();
         setNow(Date.now());
         setSession({ taskId: task._id, title: task.title, minutes, endsAt: Date.now() + minutes * 60_000, pausedLeft: null });
       },
@@ -72,7 +93,7 @@ export function FocusProvider({ children }) {
       resume: () => setSession(s => s && { ...s, endsAt: Date.now() + s.pausedLeft, pausedLeft: null }),
       stop: () => finish(false)
     }),
-    [session, left, finish]
+    [session, left, alarmActive, dismissAlarm, finish]
   );
 
   return <FocusContext.Provider value={value}>{children}</FocusContext.Provider>;

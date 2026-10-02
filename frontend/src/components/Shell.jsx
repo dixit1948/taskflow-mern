@@ -13,6 +13,7 @@ import { useTheme } from "../lib/theme";
 import TaskModal from "./TaskModal";
 import CommandPalette from "./CommandPalette";
 import FocusPill from "./FocusPill";
+import AlarmBanner from "./AlarmBanner";
 
 const NAV = [
   { to: "/", label: "Dashboard", icon: LayoutDashboard, match: p => p === "/" },
@@ -194,6 +195,7 @@ function ShellInner() {
       <TaskModal />
       <CommandPalette open={palette} onClose={() => setPalette(false)} theme={theme} toggleTheme={toggleTheme} />
       <FocusPill />
+      <AlarmBanner />
     </div>
   );
 }
